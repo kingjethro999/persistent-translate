@@ -1,0 +1,27 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "dependabot/github_actions/actions/checkout-7.0.1",
+    "dependabot/github_actions/actions/setup-node-7.1.0",
+    "dependabot/github_actions/gitleaks/gitleaks-action-ff98106e4c7b2bc287b24eaf42907196329070c7",
+    "dependabot/github_actions/pnpm/action-setup-b906affcce14559ad1aafd4ab0e942779e9f58b1",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "dependabot/github_actions/actions/checkout-7.0.1": "main",
+    "dependabot/github_actions/actions/setup-node-7.1.0": "main",
+    "dependabot/github_actions/gitleaks/gitleaks-action-ff98106e4c7b2bc287b24eaf42907196329070c7": "main",
+    "dependabot/github_actions/pnpm/action-setup-b906affcce14559ad1aafd4ab0e942779e9f58b1": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "dependabot/github_actions/actions/checkout-7.0.1",
+    "dependabot/github_actions/actions/setup-node-7.1.0",
+    "dependabot/github_actions/gitleaks/gitleaks-action-ff98106e4c7b2bc287b24eaf42907196329070c7",
+    "dependabot/github_actions/pnpm/action-setup-b906affcce14559ad1aafd4ab0e942779e9f58b1",
+    "origin"
+  ]
+}
