@@ -23,3 +23,13 @@ These controls require ongoing tests; they are not a claim of a complete securit
 - Do not add remote executable code, `eval`, dynamic function compilation, page-context credentials, broad required host access or undocumented vendor endpoints.
 - Preserve user inputs and framework-owned markup. Reject malformed/stale provider responses without erasing source content.
 - Signing and store credentials belong in approved repository environments/secrets, never source or build output.
+
+## Temporary exception for Firefox development tooling
+
+Reviewed on October 26, 2026; expires at **2026-11-26 00:00 UTC**. The complete dependency audit currently reports one unpatched high-severity advisory: [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) (registry ID `1240912`), affecting RSA PKCS#1 v1.5 signature verification in `node-forge@1.4.0`. The registry lists no patched version at review time.
+
+The reviewed dependency path is exactly `.>web-ext>@devicefarmer/adbkit>node-forge`. `web-ext` is a development dependency used for Firefox extension tooling. This transitive cryptography code serves its Android ADB tooling, which this desktop extension does not invoke. It is not a production extension dependency or bundled browser translation engine. The development dependency remains vulnerable; this is a temporary risk decision, not a vulnerability fix or a claim of a clean dependency audit.
+
+`pnpm audit:dependencies` executes the complete `pnpm audit --json`, including development dependencies and every severity, then validates the result. It emits a visible warning for this one reviewed finding and blocks every unexpected high/critical finding. The exception requires the exact GHSA ID, numeric registry ID, package, version, severity and sole dependency path above; it requires `web-ext` to remain a development dependency. It expires automatically, and an available patch, changed version, additional path or critical escalation requires fresh review. Malformed, incomplete, muted or failed audit responses also block CI. No global pnpm advisory ignore is configured.
+
+Before expiry, review upstream `web-ext`/ADB updates and remove this exception as soon as a supported fix is available. Do not use this exception to add Android tooling, expose the affected cryptographic operation, or ship `node-forge` in the browser bundle. The full audit still reports the vulnerability and should be included when describing release risk.

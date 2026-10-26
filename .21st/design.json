@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "project": {
+    "name": "persistent-translate",
+    "productType": "desktop browser extension",
+    "stack": ["TypeScript", "WXT", "native DOM"]
+  },
+  "sources": {
+    "tokens": [],
+    "components": [],
+    "assets": [],
+    "instructions": ["AGENTS.md"]
+  },
+  "design": {
+    "colorMode": "system",
+    "colors": {
+      "forest": "#0b3024",
+      "foreground": "#f6faf7"
+    },
+    "typography": {},
+    "spacing": {},
+    "radius": {},
+    "shadows": {},
+    "motion": {},
+    "density": "compact"
+  },
+  "components": {
+    "installed": [],
+    "preferredPrimitives": [
+      "native button",
+      "native select",
+      "labeled language-code input"
+    ],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [
+      "Exact-origin permission disclosure",
+      "Visible keyboard focus",
+      "No external UI runtime"
+    ],
+    "avoid": []
+  },
+  "decisions": [
+    {
+      "decision": "Compact forest-green popup with native semantic controls",
+      "reason": "Phase 1 prioritizes translation persistence; project contract specifies forest green. Catalog request returned HTTP 401, so no third-party component was imported."
+    }
+  ],
+  "evidence": [
+    {
+      "fact": "project.instructions",
+      "source": "AGENTS.md"
+    }
+  ],
+  "generatedAt": "2026-10-25T13:05:39.820Z"
+}

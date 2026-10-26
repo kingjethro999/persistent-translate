@@ -1,0 +1,107 @@
+name: Draft release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag, for example v0.1.0
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Verify existing tag and version
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      sha: ${{ steps.version.outputs.sha }}
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Validate tag syntax before checkout
+        run: |
+          node --input-type=module -e "if (!/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(process.env.RELEASE_TAG)) throw new Error('Use a stable vX.Y.Z release tag');"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: refs/tags/${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+          persist-credentials: false
+      - id: version
+        name: Require tag to match package version
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const { version } = JSON.parse(readFileSync('package.json', 'utf8'));
+          const tag = process.env.RELEASE_TAG;
+          if (tag !== `v${version}`) throw new Error('Tag must equal v plus package.json version');
+          const sha = execFileSync('git', ['rev-parse', `refs/tags/${tag}^{commit}`]).toString().trim();
+          const head = execFileSync('git', ['rev-parse', 'HEAD']).toString().trim();
+          if (sha !== head) throw new Error('Tag and checked-out commit differ');
+          appendFileSync(process.env.GITHUB_OUTPUT, `tag=${tag}\nsha=${sha}\n`);
+          NODE
+
+  checks:
+    name: Required release checks
+    needs: version
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ needs.version.outputs.sha }}
+    permissions:
+      contents: read
+
+  draft:
+    name: Create draft with audited artifacts
+    needs: [version, checks]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ needs.version.outputs.tag }}
+      RELEASE_SHA: ${{ needs.version.outputs.sha }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: unsigned-extension-packages
+          path: artifacts
+      - name: Verify checksums and source commit
+        working-directory: artifacts
+        run: |
+          sha256sum --check SHA256SUMS
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const provenance = JSON.parse(readFileSync('build-provenance.json', 'utf8'));
+          if (provenance.commit !== process.env.RELEASE_SHA) throw new Error('Artifact commit mismatch');
+          if (`v${provenance.version}` !== process.env.RELEASE_TAG) throw new Error('Artifact version mismatch');
+          NODE
+      - name: Write reviewable release notes
+        run: |
+          cat > release-notes.md <<'NOTES'
+          Development preview of Persistent Translate. These artifacts are unsigned and have passed the automated checks for this commit; real native-model availability and cross-browser readiness remain subject to the documented test matrix.
+
+          - Chrome: unzip the Chrome archive and use Developer mode → Load unpacked. This is a development install, without Chrome Web Store updates.
+          - Firefox: unzip the Firefox archive and load manifest.json temporarily through about:debugging. Permanent Firefox installation requires a Mozilla-signed XPI, which is not produced here.
+          - The source ZIP contains the exact tagged source commit, including locked dependencies and build configuration. SHA256SUMS and the permission inventory accompany the archives.
+          - No store submission, signing, remote translation service, or production deployment is performed by this workflow.
+
+          Before making this draft public, review CHANGELOG.md, PRIVACY.md, TEST_PLAN.md, docs/release.md, the native-provider limitations, and the installation instructions at this tag.
+          NOTES
+      - name: Create draft release
+        run: |
+          gh release create "$RELEASE_TAG" artifacts/* \
+            --verify-tag \
+            --target "$RELEASE_SHA" \
+            --draft \
+            --title "Persistent Translate $RELEASE_TAG (development preview)" \
+            --notes-file release-notes.md

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Persistent Translate</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="mark" aria-hidden="true">es/en</span>
+        <div>
+          <h1>Persistent Translate</h1>
+          <p class="muted">Translate once. Stay translated.</p>
+        </div>
+      </header>
+      <section class="panel">
+        <p id="origin">Loading website…</p>
+        <p id="status" role="status" aria-live="polite">
+          Checking translation state…
+        </p>
+        <label for="source">Page language</label
+        ><select id="source">
+          <option value="auto">Use page language (if declared)</option>
+          <option value="es">Spanish</option>
+          <option value="en">English</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="pt">Portuguese</option>
+          <option value="ja">Japanese</option>
+          <option value="zh">Chinese</option>
+          <option value="ar">Arabic</option>
+        </select>
+        <label for="target">Translate to</label
+        ><input
+          id="target"
+          list="languages"
+          maxlength="35"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="target-hint"
+        /><datalist id="languages">
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="pt">Portuguese</option>
+          <option value="ja">Japanese</option>
+          <option value="ar">Arabic</option>
+        </datalist>
+        <p id="target-hint" class="muted">
+          Language code, such as en, fr or pt-BR.
+        </p>
+        <button id="always">Always translate this site</button
+        ><button id="once" class="secondary">Translate this page only</button
+        ><button id="pause" class="secondary">
+          Pause this tab / show original</button
+        ><button id="resume" class="secondary">Resume translation</button>
+      </section>
+      <p class="muted">
+        Saved choices cover this exact website origin and all its paths. Page
+        text stays on this device. Top frame only.
+      </p>
+      <button id="engine" class="secondary">
+        Set up on-device translation
+      </button>
+      <p class="muted">
+        Chrome needs an open engine tab and language packs. First download size
+        is reported only when known by the browser.
+      </p>
+      <footer>
+        <button id="options" class="link">Saved sites &amp; privacy</button>
+      </footer>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

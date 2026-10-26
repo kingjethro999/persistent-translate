@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+AGENTS.md
+.wxt
+.output
+node_modules
+test-results
+playwright-report
